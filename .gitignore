@@ -1,0 +1,6 @@
+.superpowers/
+.private-journal/
+node_modules/
+.env*
+dist/
+verify/
