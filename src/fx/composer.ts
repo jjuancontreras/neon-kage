@@ -24,7 +24,7 @@ export class FxPipeline {
   private glitch = 0;
 
   constructor(renderer: WebGLRenderer, scene: Scene, camera: PerspectiveCamera, q: QualitySettings, private readonly reduced: boolean) {
-    this.composer = new EffectComposer(renderer, { frameBufferType: HalfFloatType, multisampling: q.tier === 'high' ? 4 : 0 });
+    this.composer = new EffectComposer(renderer, { frameBufferType: HalfFloatType, multisampling: 0 });
     this.bloom = new BloomEffect({
       mipmapBlur: true,
       luminanceThreshold: 0.32,

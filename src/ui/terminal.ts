@@ -44,7 +44,9 @@ export function initTerminal(deps: TerminalDeps): void {
     log.scrollTop = log.scrollHeight;
   };
 
+  let returnFocus: HTMLElement | null = null;
   const open = () => {
+    returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     root.hidden = false;
     if (!log.childElementCount) {
       print('NEON//KAGE maintenance shell v0.9 — type `help`', 'sys');
@@ -54,6 +56,8 @@ export function initTerminal(deps: TerminalDeps): void {
   const close = () => {
     root.hidden = true;
     input.blur();
+    returnFocus?.focus({ preventScroll: true });
+    returnFocus = null;
   };
 
   const commands: Record<string, (args: string[]) => void> = {

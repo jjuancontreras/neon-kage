@@ -29,6 +29,7 @@ const FOG: ReadonlyArray<readonly [number, number, string]> = [
   [1.0, 0.0017, '#4a1a44'],
 ];
 const fogColors = FOG.map((f) => new Color(f[2]));
+const PORTRAIT_PULLBACK = 1.22;
 
 export interface EngineOptions {
   readonly canvas: HTMLCanvasElement;
@@ -154,7 +155,9 @@ export class Engine {
   }
 
   private applyPose(): void {
-    this.camera.position.copy(this.pose.position);
+    // Portrait screens see less horizontally: back the camera off a little.
+    const pullback = this.camera.aspect < 0.8 ? PORTRAIT_PULLBACK : 1;
+    this.camera.position.copy(this.pose.position).sub(this.pose.target).multiplyScalar(pullback).add(this.pose.target);
     this.camera.lookAt(this.pose.target);
   }
 
@@ -163,7 +166,15 @@ export class Engine {
     if (next === this.chapter) return;
     const previous = this.chapter;
     this.chapter = next;
-    if (previous === -1) return;
+    if (previous === -1) {
+      // First frame (possibly restored mid-page): start on this chapter's hero shot.
+      if (this.opts.reduced) {
+        this.shownChapter = next;
+        this.u = heroU(next);
+        this.snapPose();
+      }
+      return;
+    }
     if (this.opts.reduced) {
       this.opts.crossfade(() => {
         this.shownChapter = next;

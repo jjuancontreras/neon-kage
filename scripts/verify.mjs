@@ -4,7 +4,7 @@
 // hidden terminal's `help` command.
 import { createServer } from 'node:http';
 import { existsSync, mkdirSync, readFileSync, statSync } from 'node:fs';
-import { extname, join, normalize, resolve } from 'node:path';
+import { extname, join, normalize, resolve, sep } from 'node:path';
 import { chromium } from 'playwright';
 
 const ROOT = resolve('dist');
@@ -31,7 +31,7 @@ function serve() {
     const url = new URL(req.url ?? '/', `http://localhost:${PORT}`);
     const rel = normalize(decodeURIComponent(url.pathname)).replace(/^([/\\])+/, '');
     let file = join(ROOT, rel || 'index.html');
-    if (!file.startsWith(ROOT)) {
+    if (file !== ROOT && !file.startsWith(ROOT + sep)) {
       res.writeHead(403).end();
       return;
     }
@@ -108,7 +108,8 @@ async function run(browser, base, vp, reducedMotion) {
   const dir = reducedMotion === 'reduce' ? join(OUT, 'reduced') : OUT;
   mkdirSync(dir, { recursive: true });
 
-  await page.goto(`${base}/${vp.query}`, { waitUntil: 'load' });
+  const query = reducedMotion === 'reduce' ? '' : vp.query;
+  await page.goto(`${base}/${query}`, { waitUntil: 'load' });
   await page.waitForFunction(() => window.__neon && window.__neon.ready(), null, { timeout: 60_000 });
   const webgl = await page.evaluate(() => window.__neon.webgl);
   await page.waitForTimeout(2500); // title scramble + HUD line draw
@@ -117,11 +118,11 @@ async function run(browser, base, vp, reducedMotion) {
   for (let i = 0; i < CHAPTERS.length; i++) {
     await page.evaluate((idx) => window.__neon.goto(idx, true), i);
     await page.waitForTimeout(reducedMotion === 'reduce' ? 900 : 600);
-    if (webgl) await waitFrames(page, 45);
+    if (webgl) await waitFrames(page, reducedMotion === 'reduce' ? 10 : 24);
     await page.waitForTimeout(400);
     const chapter = await page.evaluate(() => window.__neon.chapter());
     const file = join(dir, `${vp.name}-0${i + 1}-${CHAPTERS[i]}.png`);
-    const png = await page.screenshot({ path: file });
+    const png = await page.screenshot({ path: file, timeout: 180_000 });
     const stats = await frameStats(page, png);
     shots.push({ file, chapter, expected: i, ...stats, blank: stats.std < 6 });
   }
