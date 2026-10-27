@@ -12,6 +12,16 @@ It is a from-scratch, futuristic reinterpretation of the *idea* behind [MengTo/k
 | 04 | **Shrine Core** | A floating wireframe shrine around a pulsing GLSL AI core. Click the core, or the *Consult the core* button, for a shockwave and an oracle line. |
 | 05 | **Ascent** | The camera rises above the re-forming skyline into a synthetic magenta-to-cyan sunrise, then the credits. |
 
+## Why I built it
+
+A study in **AI-assisted (agentic) coding** for creative 3D web work. I
+researched the reference, set the art direction and the five-chapter
+structure, then directed and reviewed Claude Code as it built the scenes,
+shaders and particle systems. Originality is checked by an automated
+`npm run kage-check` script, so nothing from the reference project slips in.
+
+**Stack:** three.js · anime.js · Vite · JavaScript · WebGL/GLSL
+
 ## Run it
 
 ```bash
